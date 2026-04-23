@@ -12,17 +12,14 @@ public class Main {
             grammar.printGrammar();
             grammar.printFirstFollowSets();
 
-            // Part 1: SLR(1) [cite: 31]
             SLRParser slr = new SLRParser(grammar);
             ParsingTable slrTable = slr.buildTable();
             slrTable.print(grammar.getAllProductions());
 
-            // Part 2: LR(1) [cite: 128]
             LR1Parser lr1 = new LR1Parser(grammar);
             ParsingTable lr1Table = lr1.buildTable();
             lr1Table.print(grammar.getAllProductions());
 
-            // Parsing Example [cite: 218]
             String input = "id + id * id";
             System.out.println("Parsing input: " + input);
             parse(input, slrTable, grammar);
@@ -35,7 +32,7 @@ public class Main {
     public static void parse(String inputStr, ParsingTable table, Grammar grammar) {
         Stack stack = new Stack();
         Tree parseTree = new Tree();
-        stack.push("", 0); // Initial state [cite: 105]
+        stack.push("", 0); // Initial state
 
         List<String> tokens = new ArrayList<>(Arrays.asList(inputStr.split("\\s+")));
         tokens.add("$");
