@@ -27,14 +27,14 @@ public class LR1Parser {
             for (Items.LR1Item item : stateItems) {
                 String symbolAfterDot = item.symbolAfterDot();
 
-                // 1. Shift Actions [cite: 162]
+                // Shift Actions
                 if (symbolAfterDot != null && grammar.isTerminal(symbolAfterDot)) {
                     Set<Items.LR1Item> nextStateItems = itemsHandler.goto1(stateItems, symbolAfterDot);
                     int nextState = itemsHandler.indexOf1(canonicalCollection, nextStateItems);
                     table.setAction(i, symbolAfterDot, new ParsingTable.Action(ParsingTable.ActionType.SHIFT, nextState));
                 }
 
-                // 2. Reduce Actions (Using specific lookahead) [cite: 166, 172]
+                // Reduce Actions (Using specific lookahead)
                 else if (item.isComplete()) {
                     if (item.production.lhs.equals(grammar.getAugmentedStart()) && item.lookahead.equals("$")) {
                         table.setAction(i, "$", new ParsingTable.Action(ParsingTable.ActionType.ACCEPT, 0));
@@ -44,7 +44,7 @@ public class LR1Parser {
                     }
                 }
 
-                // 3. GOTO Actions [cite: 178]
+                // GOTO Actions
                 for (String nt : nonTerminals) {
                     Set<Items.LR1Item> nextStateItems = itemsHandler.goto1(stateItems, nt);
                     if (!nextStateItems.isEmpty()) {

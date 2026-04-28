@@ -1,11 +1,6 @@
 import java.io.*;
 import java.util.*;
 
-/**
- * Grammar.java
- * Represents a Context-Free Grammar (CFG).
- * Handles reading from file, augmentation, and computing FIRST/FOLLOW sets.
- */
 public class Grammar {
 
     // Original start symbol
@@ -40,14 +35,6 @@ public class Grammar {
         followSets = new HashMap<>();
     }
 
-    // -----------------------------------------------------------------------
-    // File reading
-    // -----------------------------------------------------------------------
-
-    /**
-     * Reads a CFG from a file.
-     * Format: NonTerminal -> prod1 | prod2 | ...
-     */
     public void readFromFile(String filename) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         String line;
@@ -95,13 +82,6 @@ public class Grammar {
         br.close();
     }
 
-    // -----------------------------------------------------------------------
-    // Augmentation
-    // -----------------------------------------------------------------------
-
-    /**
-     * Augments the grammar: adds S' -> S (original start).
-     */
     public void augment() {
         // Create augmented start symbol name
         augmentedStart = startSymbol + "Prime";
@@ -129,9 +109,6 @@ public class Grammar {
         collectTerminals();
     }
 
-    /**
-     * Collects all terminal symbols from the grammar.
-     */
     private void collectTerminals() {
         terminals.clear();
         Set<String> ntSet = new HashSet<>(nonTerminals);
@@ -148,13 +125,6 @@ public class Grammar {
         terminals.add("$");
     }
 
-    // -----------------------------------------------------------------------
-    // FIRST sets
-    // -----------------------------------------------------------------------
-
-    /**
-     * Computes FIRST sets for all non-terminals.
-     */
     public void computeFirstSets() {
         // Initialize
         for (String nt : nonTerminals) {
@@ -175,9 +145,7 @@ public class Grammar {
         }
     }
 
-    /**
-     * Returns FIRST set of a sequence of symbols.
-     */
+
     public Set<String> firstOfSequence(List<String> symbols) {
         Set<String> result = new LinkedHashSet<>();
 
@@ -203,9 +171,6 @@ public class Grammar {
         return result;
     }
 
-    /**
-     * Returns FIRST set of a single symbol.
-     */
     public Set<String> firstOf(String sym) {
         Set<String> result = new LinkedHashSet<>();
         if (sym.equals(EPSILON)) {
@@ -218,13 +183,6 @@ public class Grammar {
         return result;
     }
 
-    // -----------------------------------------------------------------------
-    // FOLLOW sets
-    // -----------------------------------------------------------------------
-
-    /**
-     * Computes FOLLOW sets for all non-terminals.
-     */
     public void computeFollowSets() {
         for (String nt : nonTerminals) {
             followSets.put(nt, new LinkedHashSet<>());
@@ -264,10 +222,6 @@ public class Grammar {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Utility / Accessors
-    // -----------------------------------------------------------------------
-
     public boolean isNonTerminal(String sym) {
         return nonTerminals.contains(sym);
     }
@@ -283,9 +237,6 @@ public class Grammar {
     public Map<String, Set<String>> getFirstSets() { return firstSets; }
     public Map<String, Set<String>> getFollowSets() { return followSets; }
 
-    /**
-     * Returns all productions as a flat list of (LHS, RHS) pairs.
-     */
     public List<Production> getAllProductions() {
         List<Production> list = new ArrayList<>();
         for (String lhs : nonTerminals) {
@@ -296,16 +247,10 @@ public class Grammar {
         return list;
     }
 
-    /**
-     * Returns all RHS alternatives for a given non-terminal.
-     */
     public List<List<String>> getProductions(String nt) {
         return productions.getOrDefault(nt, Collections.emptyList());
     }
 
-    /**
-     * Pretty-prints the (augmented) grammar.
-     */
     public void printGrammar() {
         System.out.println("=== Augmented Grammar ===");
         for (String nt : nonTerminals) {
@@ -320,9 +265,6 @@ public class Grammar {
         System.out.println();
     }
 
-    /**
-     * Prints FIRST and FOLLOW sets.
-     */
     public void printFirstFollowSets() {
         System.out.println("=== FIRST Sets ===");
         for (String nt : nonTerminals) {
@@ -336,12 +278,9 @@ public class Grammar {
         System.out.println();
     }
 
-    /**
-     * Saves augmented grammar to a file.
-     */
-    public void saveAugmentedGrammar(String filename) throws IOException {
-        PrintWriter pw = new PrintWriter(new FileWriter(filename));
-        pw.println("=== Augmented Grammar ===");
+    public void saveAugmentedGrammar(String filename, String grammarName, boolean append) throws IOException {
+        PrintWriter pw = new PrintWriter(new FileWriter(filename, append));
+        pw.println("\n=== Augmented Grammar: " + grammarName + " ===");
         for (String nt : nonTerminals) {
             List<List<String>> alts = productions.get(nt);
             StringBuilder sb = new StringBuilder(nt + " -> ");
@@ -354,13 +293,6 @@ public class Grammar {
         pw.close();
     }
 
-    // -----------------------------------------------------------------------
-    // Inner class: Production
-    // -----------------------------------------------------------------------
-
-    /**
-     * Represents a single production rule LHS -> RHS.
-     */
     public static class Production {
         public final String lhs;
         public final List<String> rhs;

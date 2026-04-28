@@ -28,14 +28,14 @@ public class SLRParser {
             for (Items.LR0Item item : stateItems) {
                 String symbolAfterDot = item.symbolAfterDot();
 
-                // 1. Shift Actions
+                // Shift Actions
                 if (symbolAfterDot != null && grammar.isTerminal(symbolAfterDot)) {
                     Set<Items.LR0Item> nextStateItems = itemsHandler.goto0(stateItems, symbolAfterDot);
                     int nextState = itemsHandler.indexOf0(canonicalCollection, nextStateItems);
                     table.setAction(i, symbolAfterDot, new ParsingTable.Action(ParsingTable.ActionType.SHIFT, nextState));
                 }
 
-                // 2. Reduce Actions (Using FOLLOW sets)
+                // Reduce Actions (Using FOLLOW sets)
                 else if (item.isComplete()) {
                     // Accept Action [cite: 86]
                     if (item.production.lhs.equals(grammar.getAugmentedStart())) {
@@ -49,7 +49,7 @@ public class SLRParser {
                     }
                 }
 
-                // 3. GOTO Actions
+                // GOTO Actions
                 for (String nt : nonTerminals) {
                     Set<Items.LR0Item> nextStateItems = itemsHandler.goto0(stateItems, nt);
                     if (!nextStateItems.isEmpty()) {

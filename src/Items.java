@@ -1,10 +1,5 @@
 import java.util.*;
-
-/**
- * Items.java
- * Handles LR(0) and LR(1) item construction.
- * Computes CLOSURE, GOTO, and builds the Canonical Collections.
- */
+import java.io.IOException;
 public class Items {
 
     private Grammar grammar;
@@ -17,11 +12,6 @@ public class Items {
         this.allProductions = grammar.getAllProductions();
     }
 
-
-    /**
-     * An LR(0) item: [production, dotPosition].
-     * E.g., A -> alpha . beta  means dotPos == |alpha|.
-     */
     public static class LR0Item {
         public final Grammar.Production production;
         public final int dotPos;
@@ -31,7 +21,6 @@ public class Items {
             this.dotPos = dotPos;
         }
 
-        /** Symbol immediately after the dot, or null if dot is at the end. */
         public String symbolAfterDot() {
             List<String> rhs = production.rhs;
             if (rhs.isEmpty() || (rhs.size() == 1 && rhs.get(0).equals(Grammar.EPSILON))) return null;
@@ -39,7 +28,6 @@ public class Items {
             return rhs.get(dotPos);
         }
 
-        /** True if the dot is at the end (reduce item). */
         public boolean isComplete() {
             return symbolAfterDot() == null;
         }
@@ -73,14 +61,6 @@ public class Items {
         }
     }
 
-    // =======================================================================
-    // LR(1) Item
-    // =======================================================================
-
-    /**
-     * An LR(1) item: [production, dotPosition, lookahead].
-     * E.g., [A -> alpha . beta, a].
-     */
     public static class LR1Item {
         public final Grammar.Production production;
         public final int dotPos;
@@ -136,13 +116,6 @@ public class Items {
         }
     }
 
-    // =======================================================================
-    // LR(0) CLOSURE and GOTO
-    // =======================================================================
-
-    /**
-     * Computes CLOSURE of a set of LR(0) items.
-     */
     public Set<LR0Item> closure0(Set<LR0Item> items) {
         Set<LR0Item> closure = new LinkedHashSet<>(items);
         Queue<LR0Item> worklist = new LinkedList<>(items);
@@ -164,9 +137,6 @@ public class Items {
         return closure;
     }
 
-    /**
-     * Computes GOTO(I, X) for LR(0): shift dot over X, then take closure.
-     */
     public Set<LR0Item> goto0(Set<LR0Item> items, String X) {
         Set<LR0Item> moved = new LinkedHashSet<>();
         for (LR0Item item : items) {
@@ -179,10 +149,6 @@ public class Items {
         return closure0(moved);
     }
 
-    /**
-     * Builds the Canonical Collection of LR(0) item sets.
-     * Returns ordered list of states (each state is a set of LR(0) items).
-     */
     public List<Set<LR0Item>> buildCanonicalLR0() {
         List<Set<LR0Item>> collection = new ArrayList<>();
 
@@ -223,7 +189,6 @@ public class Items {
         return false;
     }
 
-    /** Returns index of item set in the canonical collection, -1 if not found. */
     public int indexOf0(List<Set<LR0Item>> collection, Set<LR0Item> target) {
         for (int i = 0; i < collection.size(); i++) {
             if (collection.get(i).equals(target)) return i;
@@ -231,13 +196,6 @@ public class Items {
         return -1;
     }
 
-    // =======================================================================
-    // LR(1) CLOSURE and GOTO
-    // =======================================================================
-
-    /**
-     * Computes CLOSURE of a set of LR(1) items.
-     */
     public Set<LR1Item> closure1(Set<LR1Item> items) {
         Set<LR1Item> closure = new LinkedHashSet<>(items);
         Queue<LR1Item> worklist = new LinkedList<>(items);
@@ -274,9 +232,6 @@ public class Items {
         return closure;
     }
 
-    /**
-     * Computes GOTO(I, X) for LR(1).
-     */
     public Set<LR1Item> goto1(Set<LR1Item> items, String X) {
         Set<LR1Item> moved = new LinkedHashSet<>();
         for (LR1Item item : items) {
@@ -289,9 +244,6 @@ public class Items {
         return closure1(moved);
     }
 
-    /**
-     * Builds the Canonical Collection of LR(1) item sets.
-     */
     public List<Set<LR1Item>> buildCanonicalLR1() {
         List<Set<LR1Item>> collection = new ArrayList<>();
 
@@ -365,10 +317,9 @@ public class Items {
         System.out.println();
     }
 
-    public void saveLR0Collection(List<Set<LR0Item>> collection, String filename)
-            throws java.io.IOException {
-        java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(filename));
-        pw.println("=== Canonical Collection of LR(0) Item Sets ===\n");
+    public void saveLR0Collection(List<Set<LR0Item>> collection, String filename, String grammarName, boolean append) throws IOException {
+        java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(filename, append));
+        pw.println("\n=== LR(0) Items: " + grammarName + " ===\n");
         for (int i = 0; i < collection.size(); i++) {
             pw.println("I" + i + ":");
             for (LR0Item item : collection.get(i)) {
@@ -380,10 +331,9 @@ public class Items {
         pw.close();
     }
 
-    public void saveLR1Collection(List<Set<LR1Item>> collection, String filename)
-            throws java.io.IOException {
-        java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(filename));
-        pw.println("=== Canonical Collection of LR(1) Item Sets ===\n");
+    public void saveLR1Collection(List<Set<LR1Item>> collection, String filename, String grammarName, boolean append) throws IOException {
+        java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(filename, append));
+        pw.println("\n=== LR(1) Items: " + grammarName + " ===\n");
         for (int i = 0; i < collection.size(); i++) {
             pw.println("I" + i + ":");
             for (LR1Item item : collection.get(i)) {
@@ -398,9 +348,7 @@ public class Items {
     // Accessors
     public List<Grammar.Production> getAllProductions() { return allProductions; }
 
-    /**
-     * Returns the index of a production in the master list.
-     */
+
     public int productionIndex(Grammar.Production prod) {
         for (int i = 0; i < allProductions.size(); i++) {
             if (allProductions.get(i).equals(prod)) return i;

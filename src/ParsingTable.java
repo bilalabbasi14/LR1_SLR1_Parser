@@ -1,16 +1,9 @@
 import java.util.*;
 import java.io.*;
 
-/**
- * ParsingTable.java
- * Stores the ACTION and GOTO tables for SLR(1) or LR(1) parsers.
- * Detects and reports shift/reduce and reduce/reduce conflicts.
- */
 public class ParsingTable {
 
     public enum ActionType { SHIFT, REDUCE, ACCEPT, ERROR }
-
-    /** A single cell in the ACTION table. */
     public static class Action {
         public final ActionType type;
         public final int value; // state to shift to, OR production index to reduce by
@@ -42,8 +35,8 @@ public class ParsingTable {
     }
 
     private final int numStates;
-    private final List<String> terminals;       // ACTION columns (ordered)
-    private final List<String> nonTerminals;    // GOTO columns (ordered, excl. aug start)
+    private final List<String> terminals;
+    private final List<String> nonTerminals;
 
     // ACTION[state][terminal] = set of actions (set size > 1 => conflict)
     private final Map<Integer, Map<String, List<Action>>> actionTable;
@@ -75,9 +68,6 @@ public class ParsingTable {
     }
 
 
-    /**
-     * Sets an ACTION entry. Detects conflicts automatically.
-     */
     public void setAction(int state, String terminal, Action action) {
         Map<String, List<Action>> row = actionTable.get(state);
         if (!row.containsKey(terminal)) {
@@ -109,19 +99,11 @@ public class ParsingTable {
         }
     }
 
-    /**
-     * Sets a GOTO entry.
-     */
     public void setGoto(int state, String nonTerminal, int targetState) {
         gotoTable.get(state).put(nonTerminal, targetState);
     }
 
 
-
-    /**
-     * Returns the primary (first) action for a given state and terminal.
-     * Returns null if no action (error).
-     */
     public Action getAction(int state, String terminal) {
         Map<String, List<Action>> row = actionTable.get(state);
         if (row == null) return null;
@@ -130,18 +112,12 @@ public class ParsingTable {
         return actions.get(0); // use first (shift-preference in conflicts)
     }
 
-    /**
-     * Returns all actions for conflict display.
-     */
     public List<Action> getAllActions(int state, String terminal) {
         Map<String, List<Action>> row = actionTable.get(state);
         if (row == null) return Collections.emptyList();
         return row.getOrDefault(terminal, Collections.emptyList());
     }
 
-    /**
-     * Returns the GOTO target state, or -1 if undefined.
-     */
     public int getGoto(int state, String nonTerminal) {
         Map<String, Integer> row = gotoTable.get(state);
         if (row == null) return -1;
@@ -152,10 +128,6 @@ public class ParsingTable {
     public boolean hasConflicts() { return !conflicts.isEmpty(); }
     public List<String> getConflicts() { return Collections.unmodifiableList(conflicts); }
 
-
-    /**
-     * Pretty-prints the parsing table to stdout.
-     */
     public void print(List<Grammar.Production> productions) {
         System.out.println("=== " + parserName + " Parsing Table ===");
 
@@ -225,12 +197,9 @@ public class ParsingTable {
         return sb.toString();
     }
 
-    /**
-     * Saves parsing table to a file.
-     */
-    public void save(String filename, List<Grammar.Production> productions) throws IOException {
-        PrintWriter pw = new PrintWriter(new FileWriter(filename));
-        pw.println("=== " + parserName + " Parsing Table ===\n");
+    public void save(String filename, List<Grammar.Production> productions, String grammarName, boolean append) throws IOException {
+        PrintWriter pw = new PrintWriter(new FileWriter(filename, append));
+        pw.println("\n=== " + parserName + " Parsing Table: " + grammarName + " ===\n");
 
         int stateW = 7, colW = 12;
         StringBuilder header = new StringBuilder();

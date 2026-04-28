@@ -1,21 +1,11 @@
 import java.util.*;
 import java.io.*;
 
-/**
- * Tree.java
- * Represents a parse tree and provides utilities for building and displaying it.
- *
- * The parse tree is built during bottom-up parsing:
- * - Leaves = terminals from the input
- * - Internal nodes = non-terminals created during reduce steps
- * - Root = the start symbol
- */
 public class Tree {
 
-
     public static class TreeNode {
-        public final String symbol;           // grammar symbol this node represents
-        public final List<TreeNode> children; // left-to-right children
+        public final String symbol;
+        public final List<TreeNode> children;
         public boolean isTerminal;
 
         public TreeNode(String symbol, boolean isTerminal) {
@@ -40,8 +30,6 @@ public class Tree {
 
     private TreeNode root;
 
-    // During parsing we maintain a node stack parallel to the parser stack.
-    // Each element is the TreeNode corresponding to that stack symbol.
     private final Deque<TreeNode> nodeStack;
 
     public Tree() {
@@ -49,24 +37,10 @@ public class Tree {
         this.root      = null;
     }
 
-
-    /**
-     * Called when the parser performs a SHIFT on terminal `symbol`.
-     * Pushes a leaf node onto the node stack.
-     */
     public void shift(String symbol) {
         nodeStack.push(new TreeNode(symbol, true));
     }
 
-    /**
-     * Called when the parser performs a REDUCE using production lhs -> rhs.
-     * Pops |rhs| nodes from the node stack, creates an internal node for lhs,
-     * and pushes it back.
-     *
-     * @param lhs     the non-terminal being reduced to
-     * @param rhsSize the length of the RHS (number of symbols to pop)
-     * @param isEps   true if this is an epsilon production
-     */
     public void reduce(String lhs, int rhsSize, boolean isEps) {
         TreeNode parent = new TreeNode(lhs, false);
 
@@ -92,17 +66,10 @@ public class Tree {
         root = parent; // keep track of last reduced node (will be root at end)
     }
 
-    /**
-     * Returns the root of the parse tree (valid after successful parse).
-     */
     public TreeNode getRoot() {
         return root;
     }
 
-
-    /**
-     * Prints the parse tree to stdout in a readable indented format.
-     */
     public void print() {
         if (root == null) {
             System.out.println("[No parse tree available]");
@@ -124,9 +91,6 @@ public class Tree {
         }
     }
 
-    /**
-     * Saves the parse tree to a file.
-     */
     public void save(String filename) throws IOException {
         PrintWriter pw = new PrintWriter(new FileWriter(filename, true)); // append mode
         pw.println("=== Parse Tree ===");
@@ -149,10 +113,6 @@ public class Tree {
         }
     }
 
-    /**
-     * Returns a bracket-notation string of the tree.
-     * E.g., [Expr [Expr [Term [Factor [id]]]] [+] [Term [Factor [id]]]]
-     */
     public String toBracketNotation() {
         if (root == null) return "[]";
         return toBracketNode(root);
@@ -167,7 +127,6 @@ public class Tree {
         sb.append("]");
         return sb.toString();
     }
-
 
     public void reset() {
         nodeStack.clear();
