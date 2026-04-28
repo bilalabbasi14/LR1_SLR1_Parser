@@ -1,0 +1,3 @@
+Start -> Left = Right | Right
+Left -> * Right | id
+Right -> Left
